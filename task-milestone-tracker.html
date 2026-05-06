@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Task Milestone Tracker | مُتتبع المهام</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #fdf4f8;
+    --surface: #fff0f5;
+    --card: #ffffff;
+    --card2: #fce4ef;
+    --accent: #e0559a;
+    --accent2: #f48fb1;
+    --accent3: #a78bfa;
+    --accent4: #fb7bb8;
+    --text: #4a2040;
+    --text2: #a07090;
+    --border: #f0c4d8;
+    --danger: #e53e75;
+    --success: #7ecda4;
+    --radius: 18px;
+    --radius-sm: 10px;
+    --shadow: 0 8px 32px rgba(224,85,154,0.10);
+    --shadow-hover: 0 16px 48px rgba(224,85,154,0.20);
+    --font-en: 'Sora', sans-serif;
+    --font-ar: 'Cairo', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-en);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+  body.ar { font-family: var(--font-ar); direction: rtl; }
+
+  /* Background mesh */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 10% 0%, rgba(244,143,177,0.25) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 90% 85%, rgba(167,139,250,0.2) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 50% 50%, rgba(251,123,184,0.08) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 24px 16px 100px;
+  }
+
+  /* ── Header ── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-icon {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 4px 16px rgba(224,85,154,0.35);
+    flex-shrink: 0;
+  }
+  .logo-text h1 {
+    font-size: 1.3rem;
+    font-weight: 800;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+  }
+  .logo-text p { font-size: 0.72rem; color: var(--text2); margin-top: 2px; }
+
+  .header-actions { display: flex; gap: 8px; align-items: center; }
+
+  .btn-lang {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    color: var(--text);
+    border-radius: 50px;
+    padding: 7px 18px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .btn-lang:hover { border-color: var(--accent); color: var(--accent); }
+
+  .btn-reset {
+    background: linear-gradient(135deg, var(--danger), #c2185b);
+    border: none;
+    color: #fff;
+    border-radius: 50px;
+    padding: 7px 18px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    box-shadow: 0 4px 14px rgba(229,62,117,0.28);
+  }
+  .btn-reset:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(229,62,117,0.38); }
+
+  /* ── Section titles ── */
+  .section-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+
+  /* ── Create Task Card ── */
+  .create-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 28px;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.3s;
+  }
+  .create-card:hover { box-shadow: var(--shadow-hover); }
+
+  .input-group { margin-bottom: 18px; }
+  .input-group label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text2);
+    margin-bottom: 7px;
+    letter-spacing: 0.03em;
+  }
+  .input-group input[type="text"] {
+    width: 100%;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    color: var(--text);
+    font-size: 0.95rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .input-group input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(224,85,154,0.15);
+  }
+
+  /* Milestones builder */
+  .milestones-builder { margin-bottom: 18px; }
+  .milestone-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 10px;
+    animation: fadeSlide 0.3s ease;
+  }
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .milestone-row input[type="text"] {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    color: var(--text);
+    font-size: 0.88rem;
+    font-family: inherit;
+    outline: none;
+    width: 100%;
+    transition: border-color 0.2s;
+  }
+  .milestone-row input:focus { border-color: var(--accent); }
+  .seq-input {
+    background: var(--bg) !important;
+    border: 1.5px solid var(--border) !important;
+    border-radius: var(--radius-sm) !important;
+    padding: 11px 8px !important;
+    color: var(--accent) !important;
+    font-size: 0.88rem !important;
+    font-weight: 700 !important;
+    font-family: inherit !important;
+    width: 54px !important;
+    text-align: center;
+    outline: none;
+    -moz-appearance: textfield;
+  }
+  .seq-input::-webkit-outer-spin-button,
+  .seq-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+  .btn-remove-ms {
+    background: rgba(255,77,109,0.12);
+    border: none;
+    color: var(--danger);
+    width: 36px; height: 36px;
+    border-radius: 9px;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  .btn-remove-ms:hover { background: rgba(255,77,109,0.25); }
+
+  .btn-add-ms {
+    display: flex; align-items: center; gap: 7px;
+    background: rgba(224,85,154,0.07);
+    border: 1.5px dashed var(--accent);
+    color: var(--accent);
+    border-radius: var(--radius-sm);
+    padding: 10px 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    font-family: inherit;
+    transition: background 0.2s;
+    margin-bottom: 18px;
+  }
+  .btn-add-ms:hover { background: rgba(224,85,154,0.14); }
+
+  .btn-create {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent), #c2185b);
+    border: none;
+    color: #fff;
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    letter-spacing: 0.02em;
+    box-shadow: 0 6px 20px rgba(224,85,154,0.35);
+    transition: all 0.2s;
+  }
+  .btn-create:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(224,85,154,0.45); }
+  .btn-create:active { transform: translateY(0); }
+
+  /* ── Tasks List ── */
+  .tasks-empty {
+    text-align: center;
+    color: var(--text2);
+    padding: 48px 24px;
+    background: var(--card);
+    border: 1.5px dashed var(--border);
+    border-radius: var(--radius);
+  }
+  .tasks-empty .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+  .tasks-empty p { font-size: 0.9rem; }
+
+  .task-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: box-shadow 0.3s, transform 0.2s;
+    animation: fadeSlide 0.35s ease;
+  }
+  .task-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+  .task-card.completed { border-color: rgba(67,233,123,0.4); }
+
+  .task-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 20px;
+    border-bottom: 1.5px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+  }
+  .task-header:hover { background: rgba(255,255,255,0.02); }
+
+  .task-checkbox {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    border: 2.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.25s;
+    background: transparent;
+    font-size: 14px;
+  }
+  .task-checkbox.done {
+    background: linear-gradient(135deg, var(--accent), var(--accent4));
+    border-color: transparent;
+    box-shadow: 0 0 14px rgba(224,85,154,0.4);
+  }
+
+  .task-info { flex: 1; min-width: 0; }
+  .task-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .task-name.done-text { text-decoration: line-through; color: var(--text2); }
+
+  .task-progress-line {
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .prog-bar-wrap {
+    flex: 1;
+    height: 5px;
+    background: var(--border);
+    border-radius: 50px;
+    overflow: hidden;
+  }
+  .prog-bar-fill {
+    height: 100%;
+    border-radius: 50px;
+    background: linear-gradient(90deg, var(--accent), var(--accent3));
+    transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+  }
+  .prog-label { font-size: 0.7rem; color: var(--text2); font-weight: 600; white-space: nowrap; }
+
+  .task-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .btn-icon {
+    background: rgba(255,255,255,0.05);
+    border: none;
+    color: var(--text2);
+    width: 34px; height: 34px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .btn-icon:hover { background: rgba(224,85,154,0.12); color: var(--accent); }
+  .btn-icon.del:hover { background: rgba(229,62,117,0.12); color: var(--danger); }
+
+  .expand-arrow {
+    color: var(--text2);
+    font-size: 0.75rem;
+    transition: transform 0.3s;
+    flex-shrink: 0;
+  }
+  .task-card.open .expand-arrow { transform: rotate(180deg); }
+
+  /* Milestones list */
+  .milestones-list {
+    display: none;
+    padding: 16px 20px;
+    gap: 10px;
+    flex-direction: column;
+  }
+  .task-card.open .milestones-list { display: flex; }
+
+  .ms-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .ms-item:hover { border-color: var(--accent); background: rgba(224,85,154,0.05); }
+  .ms-item.ms-done { border-color: rgba(224,85,154,0.25); background: rgba(224,85,154,0.04); }
+
+  .ms-check {
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .ms-done .ms-check {
+    background: linear-gradient(135deg, var(--accent), var(--accent4));
+    border-color: transparent;
+    box-shadow: 0 0 10px rgba(224,85,154,0.35);
+  }
+
+  .ms-info { flex: 1; min-width: 0; }
+  .ms-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+    transition: color 0.2s;
+  }
+  .ms-done .ms-name { text-decoration: line-through; color: var(--text2); }
+
+  .ms-seq-badge {
+    background: rgba(224,85,154,0.1);
+    color: var(--accent);
+    border: 1px solid rgba(224,85,154,0.25);
+    border-radius: 50px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 10px;
+    flex-shrink: 0;
+  }
+  .ms-done .ms-seq-badge { background: rgba(126,205,164,0.12); color: #4caf82; border-color: rgba(126,205,164,0.3); }
+
+  .ms-edit-btn {
+    background: none; border: none; color: var(--text2);
+    cursor: pointer; padding: 4px; font-size: 0.85rem;
+    border-radius: 6px; transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .ms-edit-btn:hover { color: var(--accent); background: rgba(224,85,154,0.1); }
+
+  /* Inline edit for milestone */
+  .ms-edit-row {
+    display: flex; gap: 8px; align-items: center;
+    background: var(--bg);
+    border: 1.5px solid var(--accent);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    animation: fadeSlide 0.2s ease;
+  }
+  .ms-edit-row input[type="text"] {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-size: 0.88rem;
+    font-family: inherit;
+    outline: none;
+  }
+  .ms-edit-row input[type="number"] {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--accent);
+    font-size: 0.88rem;
+    font-weight: 700;
+    font-family: inherit;
+    width: 48px;
+    text-align: center;
+    outline: none;
+    padding: 4px;
+    -moz-appearance: textfield;
+  }
+  .ms-edit-row input[type="number"]::-webkit-outer-spin-button,
+  .ms-edit-row input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .btn-save-ms {
+    background: var(--success);
+    border: none; color: #000;
+    border-radius: 7px; padding: 5px 12px;
+    font-size: 0.8rem; font-weight: 700; cursor: pointer;
+    font-family: inherit; transition: opacity 0.2s;
+  }
+  .btn-save-ms:hover { opacity: 0.85; }
+
+  /* Finish task button */
+  .task-footer {
+    padding: 0 20px 16px;
+    display: none;
+  }
+  .task-card.open .task-footer { display: block; }
+  .btn-finish {
+    width: 100%;
+    background: linear-gradient(135deg, #f48fb1, var(--accent3));
+    border: none; color: #fff;
+    border-radius: var(--radius-sm);
+    padding: 13px;
+    font-size: 0.95rem; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+    box-shadow: 0 6px 20px rgba(244,143,177,0.35);
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+  .btn-finish:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(244,143,177,0.48); }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(8px);
+    z-index: 100;
+    display: none; align-items: center; justify-content: center;
+    padding: 16px;
+  }
+  .modal-overlay.show { display: flex; }
+
+  .modal {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 24px;
+    max-width: 380px; width: 100%;
+    animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    text-align: center;
+    position: relative;
+  }
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .modal-icon { font-size: 3rem; margin-bottom: 12px; }
+  .modal h2 { font-size: 1.2rem; font-weight: 800; margin-bottom: 10px; color: var(--text); }
+  .modal p { font-size: 0.88rem; color: var(--text2); line-height: 1.6; }
+  .modal-list { list-style: none; margin: 14px 0; text-align: start; }
+  .modal-list li {
+    background: rgba(229,62,117,0.07);
+    border: 1px solid rgba(229,62,117,0.2);
+    border-radius: 8px;
+    padding: 8px 14px;
+    margin-bottom: 7px;
+    font-size: 0.85rem;
+    color: var(--danger);
+    font-weight: 600;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .btn-modal-close {
+    margin-top: 18px;
+    background: linear-gradient(135deg, var(--accent), #c2185b);
+    border: none; color: #fff;
+    border-radius: var(--radius-sm);
+    padding: 12px 32px;
+    font-size: 0.95rem; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+    transition: all 0.2s;
+    box-shadow: 0 6px 20px rgba(224,85,154,0.35);
+  }
+  .btn-modal-close:hover { transform: translateY(-2px); }
+
+  /* Congrats modal */
+  .congrats-modal .modal-icon { font-size: 4rem; }
+  .congrats-modal h2 { font-size: 1.5rem; background: linear-gradient(90deg, var(--accent), var(--accent3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+  /* ── Confetti ── */
+  .confetti-wrap {
+    position: fixed; inset: 0; pointer-events: none; z-index: 200;
+    overflow: hidden;
+  }
+  .confetti-wrap.hidden { display: none; }
+  .confetti-piece {
+    position: absolute;
+    width: 10px; height: 10px;
+    top: -20px;
+    border-radius: 2px;
+    animation: confettiFall linear forwards;
+    transform-origin: center center;
+  }
+  @keyframes confettiFall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    80% { opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    bottom: 28px;
+    left: 50%; transform: translateX(-50%) translateY(80px);
+    background: #fff;
+    border: 1.5px solid var(--border);
+    color: var(--text);
+    padding: 12px 22px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    z-index: 300;
+    box-shadow: 0 8px 24px rgba(224,85,154,0.18);
+    transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    white-space: nowrap;
+    max-width: calc(100vw - 32px);
+    text-align: center;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ── Footer ── */
+  .site-footer {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 22px 16px 28px;
+    border-top: 1.5px solid var(--border);
+    margin-top: 12px;
+  }
+  .footer-inner {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 50px;
+    padding: 10px 22px;
+    box-shadow: 0 4px 16px rgba(224,85,154,0.1);
+  }
+  .footer-heart { color: var(--accent); font-size: 1rem; animation: heartbeat 1.4s ease-in-out infinite; }
+  @keyframes heartbeat {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.25); }
+  }
+  .footer-text { font-size: 0.78rem; color: var(--text2); font-weight: 600; }
+  .footer-text strong { color: var(--accent); font-weight: 800; }
+  .footer-brand {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: linear-gradient(135deg, var(--accent), var(--accent3));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    font-weight: 800; font-size: 0.82rem;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 480px) {
+    .header { flex-direction: column; align-items: flex-start; }
+    .milestone-row { grid-template-columns: 1fr 46px 36px; }
+    .task-name { font-size: 0.92rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="confetti-wrap hidden" id="confettiWrap"></div>
+<div class="toast" id="toast"></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalBox">
+    <div class="modal-icon" id="modalIcon">⚠️</div>
+    <h2 id="modalTitle"></h2>
+    <p id="modalMsg"></p>
+    <ul class="modal-list" id="modalList"></ul>
+    <button class="btn-modal-close" onclick="closeModal()" id="modalCloseBtn">OK</button>
+  </div>
+</div>
+
+<div class="app">
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">✦</div>
+      <div class="logo-text">
+        <h1 id="appTitle">Milestone Tracker</h1>
+        <p id="appSub">Plan. Execute. Celebrate. 🎉</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-lang" onclick="toggleLang()" id="btnLang">عربي</button>
+      <button class="btn-reset" onclick="confirmReset()" id="btnReset">🗑 Reset</button>
+    </div>
+  </div>
+
+  <!-- CREATE TASK -->
+  <div class="section-label" id="labelCreate">CREATE NEW TASK</div>
+  <div class="create-card">
+    <div class="input-group">
+      <label id="labelTaskName">Task Name</label>
+      <input type="text" id="taskNameInput" placeholder="e.g. Prepare for holiday trip" />
+    </div>
+    <div class="milestones-builder">
+      <label style="font-size:0.8rem;font-weight:600;color:var(--text2);margin-bottom:10px;display:block;" id="labelMilestones">Milestones</label>
+      <div id="msRows"></div>
+    </div>
+    <button class="btn-add-ms" onclick="addMsRow()" id="btnAddMs">＋ <span id="addMsText">Add Milestone</span></button>
+    <button class="btn-create" onclick="createTask()" id="btnCreate">Create Task →</button>
+  </div>
+
+  <!-- TASKS -->
+  <div class="section-label" id="labelTasks">MY TASKS</div>
+  <div id="tasksList"></div>
+</div>
+
+<script>
+// ── i18n ──────────────────────────────────────────────────────────
+const i18n = {
+  en: {
+    appTitle: 'Milestone Tracker',
+    appSub: 'Plan. Execute. Celebrate. 🎉',
+    labelCreate: 'CREATE NEW TASK',
+    labelTaskName: 'Task Name',
+    labelMilestones: 'Milestones',
+    addMsText: 'Add Milestone',
+    btnCreate: 'Create Task →',
+    btnReset: '🗑 Reset',
+    labelTasks: 'MY TASKS',
+    btnLang: 'عربي',
+    seqLabel: 'Seq',
+    emptyTitle: 'No tasks yet',
+    emptyMsg: 'Create your first task above to get started!',
+    taskNamePH: 'e.g. Prepare for holiday trip',
+    msPH: 'e.g. Book hotel',
+    finishBtn: '🏁 Mark as Complete',
+    warnTitle: 'Incomplete Milestones!',
+    warnMsg: 'You must complete the following milestones first:',
+    warnClose: 'Got it!',
+    congratsTitle: '🎊 Task Completed!',
+    congratsMsg: 'Amazing! You crushed it! All milestones are done.',
+    congratsClose: 'Woohoo! 🥳',
+    resetConfirmTitle: 'Reset Everything?',
+    resetConfirmMsg: 'This will delete all tasks and milestones permanently.',
+    resetConfirmClose: 'Yes, Reset!',
+    resetCancelClose: 'Cancel',
+    seqPlaceholder: '#',
+    toastCreated: '✅ Task created!',
+    toastDeleted: '🗑 Task deleted',
+    toastSaved: '💾 Saved!',
+    editSave: '✓',
+    noMsWarning: 'Add at least one milestone!',
+    noNameWarning: 'Please enter a task name!',
+  },
+  ar: {
+    appTitle: 'متتبع المهام',
+    appSub: 'خطط. نفّذ. احتفل. 🎉',
+    labelCreate: 'إنشاء مهمة جديدة',
+    labelTaskName: 'اسم المهمة',
+    labelMilestones: 'المراحل',
+    addMsText: 'إضافة مرحلة',
+    btnCreate: 'إنشاء المهمة ←',
+    btnReset: '🗑 إعادة تعيين',
+    labelTasks: 'مهامي',
+    btnLang: 'English',
+    seqLabel: 'الترتيب',
+    emptyTitle: 'لا توجد مهام بعد',
+    emptyMsg: 'أنشئ مهمتك الأولى للبدء!',
+    taskNamePH: 'مثال: الاستعداد للرحلة',
+    msPH: 'مثال: حجز الفندق',
+    finishBtn: '🏁 تعليم كمنجز',
+    warnTitle: 'مراحل غير مكتملة!',
+    warnMsg: 'يجب إكمال المراحل التالية أولاً:',
+    warnClose: 'حسناً!',
+    congratsTitle: '🎊 تم إنجاز المهمة!',
+    congratsMsg: 'رائع! لقد أتممت جميع المراحل بنجاح.',
+    congratsClose: 'هورايا! 🥳',
+    resetConfirmTitle: 'إعادة تعيين الكل؟',
+    resetConfirmMsg: 'سيتم حذف جميع المهام والمراحل بشكل نهائي.',
+    resetConfirmClose: 'نعم، إعادة تعيين!',
+    resetCancelClose: 'إلغاء',
+    seqPlaceholder: '#',
+    toastCreated: '✅ تم إنشاء المهمة!',
+    toastDeleted: '🗑 تم الحذف',
+    toastSaved: '💾 تم الحفظ!',
+    editSave: '✓',
+    noMsWarning: 'أضف مرحلة واحدة على الأقل!',
+    noNameWarning: 'يرجى إدخال اسم المهمة!',
+  }
+};
+
+let lang = localStorage.getItem('msLang') || 'en';
+let tasks = JSON.parse(localStorage.getItem('msTasks') || '[]');
+let msRowCount = 0;
+let resetCallback = null;
+
+function t(key) { return i18n[lang][key] || key; }
+
+// ── Language ──────────────────────────────────────────────────────
+function toggleLang() {
+  lang = lang === 'en' ? 'ar' : 'en';
+  localStorage.setItem('msLang', lang);
+  applyLang();
+  renderTasks();
+}
+
+function applyLang() {
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.body.classList.toggle('ar', lang === 'ar');
+  const keys = ['appTitle','appSub','labelCreate','labelTaskName','labelMilestones','addMsText','btnCreate','btnReset','labelTasks','btnLang'];
+  keys.forEach(k => { const el = document.getElementById(k); if(el) el.textContent = t(k); });
+  document.getElementById('taskNameInput').placeholder = t('taskNamePH');
+  document.querySelectorAll('.ms-name-input').forEach(inp => inp.placeholder = t('msPH'));
+}
+
+// ── Storage ───────────────────────────────────────────────────────
+function save() { localStorage.setItem('msTasks', JSON.stringify(tasks)); }
+
+// ── Milestone rows (creation form) ───────────────────────────────
+function addMsRow(name='', seq='') {
+  msRowCount++;
+  const id = 'ms_' + msRowCount;
+  const row = document.createElement('div');
+  row.className = 'milestone-row';
+  row.id = id;
+  row.innerHTML = `
+    <input type="text" class="ms-name-input" placeholder="${t('msPH')}" value="${escHtml(name)}" />
+    <input type="number" class="seq-input" placeholder="${t('seqPlaceholder')}" value="${seq}" min="1" max="999" />
+    <button class="btn-remove-ms" onclick="removeMsRow('${id}')">✕</button>
+  `;
+  document.getElementById('msRows').appendChild(row);
+}
+
+function removeMsRow(id) {
+  const el = document.getElementById(id);
+  if(el) el.remove();
+}
+
+// ── Create Task ───────────────────────────────────────────────────
+function createTask() {
+  const name = document.getElementById('taskNameInput').value.trim();
+  if(!name) { showToast(t('noNameWarning')); return; }
+  const rows = document.querySelectorAll('#msRows .milestone-row');
+  if(rows.length === 0) { showToast(t('noMsWarning')); return; }
+  const milestones = [];
+  rows.forEach(row => {
+    const n = row.querySelector('.ms-name-input').value.trim();
+    const s = parseInt(row.querySelector('.seq-input').value) || 1;
+    if(n) milestones.push({ id: genId(), name: n, seq: s, done: false });
+  });
+  if(milestones.length === 0) { showToast(t('noMsWarning')); return; }
+  milestones.sort((a,b) => a.seq - b.seq);
+  const task = { id: genId(), name, milestones, done: false, open: true };
+  tasks.unshift(task);
+  save();
+  // reset form
+  document.getElementById('taskNameInput').value = '';
+  document.getElementById('msRows').innerHTML = '';
+  msRowCount = 0;
+  addMsRow();
+  renderTasks();
+  showToast(t('toastCreated'));
+}
+
+// ── Render Tasks ──────────────────────────────────────────────────
+function renderTasks() {
+  const list = document.getElementById('tasksList');
+  if(tasks.length === 0) {
+    list.innerHTML = `<div class="tasks-empty"><div class="empty-icon">📋</div><p>${t('emptyTitle')}<br/><span style="opacity:.6">${t('emptyMsg')}</span></p></div>`;
+    return;
+  }
+  list.innerHTML = tasks.map(task => renderTaskCard(task)).join('');
+}
+
+function renderTaskCard(task) {
+  const total = task.milestones.length;
+  const doneCount = task.milestones.filter(m => m.done).length;
+  const pct = total ? Math.round(doneCount/total*100) : 0;
+  const openClass = task.open ? 'open' : '';
+  const completedClass = task.done ? 'completed' : '';
+
+  const msHTML = task.milestones.map(ms => renderMsItem(task.id, ms)).join('');
+
+  return `
+  <div class="task-card ${openClass} ${completedClass}" id="tc_${task.id}">
+    <div class="task-header" onclick="toggleTask('${task.id}')">
+      <div class="task-checkbox ${task.done ? 'done' : ''}" onclick="event.stopPropagation(); finishTask('${task.id}')">${task.done ? '✓' : ''}</div>
+      <div class="task-info">
+        <div class="task-name ${task.done ? 'done-text' : ''}">${escHtml(task.name)}</div>
+        <div class="task-progress-line">
+          <div class="prog-bar-wrap"><div class="prog-bar-fill" style="width:${pct}%"></div></div>
+          <span class="prog-label">${doneCount}/${total}</span>
+        </div>
+      </div>
+      <div class="task-actions" onclick="event.stopPropagation()">
+        <button class="btn-icon del" onclick="deleteTask('${task.id}')" title="Delete">🗑</button>
+      </div>
+      <span class="expand-arrow">▼</span>
+    </div>
+    <div class="milestones-list" id="ml_${task.id}">${msHTML}</div>
+    <div class="task-footer">
+      <button class="btn-finish" onclick="finishTask('${task.id}')">${t('finishBtn')}</button>
+    </div>
+  </div>`;
+}
+
+function renderMsItem(taskId, ms) {
+  return `
+  <div class="ms-item ${ms.done ? 'ms-done' : ''}" id="msi_${ms.id}">
+    <div class="ms-check ${ms.done ? '' : ''}" onclick="toggleMs('${taskId}','${ms.id}')">${ms.done ? '✓' : ''}</div>
+    <div class="ms-info" onclick="toggleMs('${taskId}','${ms.id}')">
+      <div class="ms-name">${escHtml(ms.name)}</div>
+    </div>
+    <span class="ms-seq-badge">${t('seqLabel')} ${ms.seq}</span>
+    <button class="ms-edit-btn" onclick="editMsInline('${taskId}','${ms.id}')" title="Edit">✏️</button>
+  </div>`;
+}
+
+// ── Toggle ────────────────────────────────────────────────────────
+function toggleTask(id) {
+  const task = tasks.find(t => t.id === id);
+  if(!task) return;
+  task.open = !task.open;
+  save();
+  // quick DOM toggle instead of full re-render
+  const card = document.getElementById('tc_'+id);
+  if(card) card.classList.toggle('open', task.open);
+}
+
+function toggleMs(taskId, msId) {
+  const task = tasks.find(t => t.id === taskId);
+  if(!task) return;
+  const ms = task.milestones.find(m => m.id === msId);
+  if(!ms) return;
+  ms.done = !ms.done;
+  // update task done state
+  task.done = task.milestones.every(m => m.done);
+  save();
+  updateTaskCardDOM(task);
+}
+
+function updateTaskCardDOM(task) {
+  const card = document.getElementById('tc_'+task.id);
+  if(!card) return;
+  // Re-render just this card
+  const total = task.milestones.length;
+  const doneCount = task.milestones.filter(m => m.done).length;
+  const pct = total ? Math.round(doneCount/total*100) : 0;
+  card.querySelector('.prog-bar-fill').style.width = pct+'%';
+  card.querySelector('.prog-label').textContent = doneCount+'/'+total;
+  card.querySelector('.task-name').className = 'task-name' + (task.done ? ' done-text' : '');
+  const cb = card.querySelector('.task-checkbox');
+  cb.className = 'task-checkbox' + (task.done ? ' done' : '');
+  cb.textContent = task.done ? '✓' : '';
+  card.classList.toggle('completed', task.done);
+  // re-render milestones
+  const ml = document.getElementById('ml_'+task.id);
+  if(ml) ml.innerHTML = task.milestones.map(ms => renderMsItem(task.id, ms)).join('');
+}
+
+// ── Finish Task ───────────────────────────────────────────────────
+function finishTask(taskId) {
+  const task = tasks.find(t => t.id === taskId);
+  if(!task) return;
+  const incomplete = task.milestones.filter(m => !m.done).sort((a,b) => a.seq - b.seq);
+  if(incomplete.length > 0) {
+    showWarningModal(incomplete);
+    return;
+  }
+  task.done = true;
+  save();
+  updateTaskCardDOM(task);
+  showCongratsModal();
+  launchConfetti();
+}
+
+// ── Delete Task ───────────────────────────────────────────────────
+function deleteTask(id) {
+  tasks = tasks.filter(t => t.id !== id);
+  save();
+  renderTasks();
+  showToast(t('toastDeleted'));
+}
+
+// ── Inline milestone edit ─────────────────────────────────────────
+function editMsInline(taskId, msId) {
+  const task = tasks.find(t => t.id === taskId);
+  if(!task) return;
+  const ms = task.milestones.find(m => m.id === msId);
+  if(!ms) return;
+  const el = document.getElementById('msi_'+msId);
+  if(!el) return;
+  el.outerHTML = `
+  <div class="ms-edit-row" id="msi_${msId}">
+    <input type="text" value="${escHtml(ms.name)}" id="medit_name_${msId}" style="flex:1;background:transparent;border:none;color:var(--text);font-size:.88rem;font-family:inherit;outline:none;" />
+    <input type="number" value="${ms.seq}" id="medit_seq_${msId}" min="1" max="999" />
+    <button class="btn-save-ms" onclick="saveMsEdit('${taskId}','${msId}')">${t('editSave')}</button>
+  </div>`;
+  document.getElementById('medit_name_'+msId)?.focus();
+}
+
+function saveMsEdit(taskId, msId) {
+  const task = tasks.find(t => t.id === taskId);
+  if(!task) return;
+  const ms = task.milestones.find(m => m.id === msId);
+  if(!ms) return;
+  const nameEl = document.getElementById('medit_name_'+msId);
+  const seqEl = document.getElementById('medit_seq_'+msId);
+  if(nameEl) ms.name = nameEl.value.trim() || ms.name;
+  if(seqEl) ms.seq = parseInt(seqEl.value) || ms.seq;
+  task.milestones.sort((a,b) => a.seq - b.seq);
+  save();
+  const ml = document.getElementById('ml_'+taskId);
+  if(ml) ml.innerHTML = task.milestones.map(m => renderMsItem(taskId, m)).join('');
+  showToast(t('toastSaved'));
+}
+
+// ── Modals ────────────────────────────────────────────────────────
+function showWarningModal(incomplete) {
+  document.getElementById('modalIcon').textContent = '⚠️';
+  document.getElementById('modalBox').className = 'modal';
+  document.getElementById('modalTitle').textContent = t('warnTitle');
+  document.getElementById('modalMsg').textContent = t('warnMsg');
+  document.getElementById('modalList').innerHTML = incomplete.map(m =>
+    `<li>⚡ ${escHtml(m.name)} <span style="opacity:.6;font-weight:400;margin-inline-start:4px">(${t('seqLabel')} ${m.seq})</span></li>`
+  ).join('');
+  document.getElementById('modalCloseBtn').textContent = t('warnClose');
+  document.getElementById('modalCloseBtn').onclick = closeModal;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function showCongratsModal() {
+  document.getElementById('modalIcon').textContent = '🏆';
+  document.getElementById('modalBox').className = 'modal congrats-modal';
+  document.getElementById('modalTitle').textContent = t('congratsTitle');
+  document.getElementById('modalMsg').textContent = t('congratsMsg');
+  document.getElementById('modalList').innerHTML = '';
+  document.getElementById('modalCloseBtn').textContent = t('congratsClose');
+  document.getElementById('modalCloseBtn').onclick = closeModal;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function confirmReset() {
+  document.getElementById('modalIcon').textContent = '🗑️';
+  document.getElementById('modalBox').className = 'modal';
+  document.getElementById('modalTitle').textContent = t('resetConfirmTitle');
+  document.getElementById('modalMsg').textContent = t('resetConfirmMsg');
+  document.getElementById('modalList').innerHTML = '';
+  document.getElementById('modalCloseBtn').textContent = t('resetConfirmClose');
+  document.getElementById('modalCloseBtn').style.background = 'linear-gradient(135deg,var(--danger),#c2185b)';
+  document.getElementById('modalCloseBtn').onclick = doReset;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function doReset() {
+  tasks = [];
+  save();
+  document.getElementById('taskNameInput').value = '';
+  document.getElementById('msRows').innerHTML = '';
+  msRowCount = 0;
+  addMsRow();
+  renderTasks();
+  closeModal();
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+  document.getElementById('modalCloseBtn').style.background = '';
+  document.getElementById('modalCloseBtn').onclick = closeModal;
+}
+
+// ── Confetti ──────────────────────────────────────────────────────
+function launchConfetti() {
+  const wrap = document.getElementById('confettiWrap');
+  wrap.classList.remove('hidden');
+  wrap.innerHTML = '';
+  const colors = ['#e0559a','#f48fb1','#a78bfa','#fb7bb8','#f9a8d4','#c084fc','#fda4af','#fb923c','#fde68a','#d946ef'];
+  for(let i=0; i<90; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti-piece';
+    const color = colors[Math.floor(Math.random()*colors.length)];
+    const size = 6 + Math.random()*10;
+    const left = Math.random()*100;
+    const dur = 2.2 + Math.random()*2;
+    const delay = Math.random()*1.5;
+    const shapes = ['2px','50%','0'];
+    const br = shapes[Math.floor(Math.random()*shapes.length)];
+    c.style.cssText = `left:${left}vw;width:${size}px;height:${size}px;background:${color};border-radius:${br};animation-duration:${dur}s;animation-delay:${delay}s;`;
+    wrap.appendChild(c);
+  }
+  setTimeout(() => { wrap.classList.add('hidden'); wrap.innerHTML=''; }, 5000);
+}
+
+// ── Toast ─────────────────────────────────────────────────────────
+let toastTimeout;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+// ── Helpers ───────────────────────────────────────────────────────
+function genId() { return Math.random().toString(36).slice(2,10); }
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ── Init ──────────────────────────────────────────────────────────
+applyLang();
+addMsRow();
+renderTasks();
+</script>
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span class="footer-heart">♥</span>
+    <span class="footer-text">Designed by <strong>Ali Karam</strong> &nbsp;·&nbsp; <span class="footer-brand">✦ Itqan Solutions</span></span>
+  </div>
+</footer>
+
+</body>
+</html>
